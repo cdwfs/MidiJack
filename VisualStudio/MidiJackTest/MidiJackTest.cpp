@@ -15,13 +15,16 @@ IMPORT_API uint32_t MidiJackGetEndpointIDAtIndex(int index);
 IMPORT_API const char* MidiJackGetEndpointName(uint32_t id);
 // Retrieve and erase an MIDI message data from the message queue.
 IMPORT_API uint64_t MidiJackDequeueIncomingData();
-// Refresh the list of active endpoint devices.
-// This will force-close all previously-connected
-// endpoints and recreate them from scratch.
-IMPORT_API int MidiJackRefreshEndpoints();
 
 int main(int argc, char* argv[]) {
-  MidiJackRefreshEndpoints();
+  // Must dequeue once to force the endpoints to refresh
+  do
+  {
+    uint64_t msg = MidiJackDequeueIncomingData();
+    if (msg == 0) {
+      break; // no more data to dequeue
+    }
+  } while (true);
 
   int endpointCount = MidiJackCountEndpoints();
   printf("Detected %d endpoints:\n", endpointCount);
